@@ -23,21 +23,20 @@ jobs:
           --health-retries=5
 
     steps:
-      # 1. Lấy code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Cài Java
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # 3. Đợi MySQL khởi động
+      - name: Grant execute permission
+        run: chmod +x gradlew
+
       - name: Wait for MySQL
         run: sleep 20
 
-      # 4. Build + test
       - name: Build with Gradle
         run: ./gradlew build -Dspring.profiles.active=test
