@@ -1,4 +1,4 @@
-name: Spring Boot CI (Gradle + MySQL)
+name: Spring Boot CI (Gradle)
 
 on:
   push:
@@ -7,20 +7,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    services:
-      mysql:
-        image: mysql:8
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: testdb
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
 
     steps:
       - name: Checkout code
@@ -35,8 +21,5 @@ jobs:
       - name: Grant execute permission
         run: chmod +x gradlew
 
-      - name: Wait for MySQL
-        run: sleep 20
-
       - name: Build with Gradle
-        run: ./gradlew build -Dspring.profiles.active=test
+        run: ./gradlew clean build -Dspring.profiles.active=test
