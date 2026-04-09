@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <th:block th:insert="~{layout/layout::library}"/>
+</head>
+<body>
+<th:block th:replace="~{layout/layout::my-navbar}"></th:block>
+<h2 style="margin-left: 500px;margin-top: 20px" th:text="#{table.title}"></h2>
+<div class="d-flex justify-content-between p-5">
+    <a class="btn btn-sm btn-success" href="student/add" th:text="#{add.title}"></a>
+    <form action="/student" method="get" class="d-flex ">
+        <input class="form-control form-control-sm mx-2" name="searchName" th:placeholder="#{search.value}" th:value="${searchName}">
+        <button class="btn btn-sm btn-primary" th:text="#{search.button}">Search</button>
+    </form>
+
+</div>
+
+
+<table class="table table-dark">
+    <tr>
+        <th th:text="#{table.no}"></th>
+        <th>ID</th>
+        <th th:text="#{table.name}"></th>
+        <th th:text="#{table.gender}"></th>
+        <th th:text="#{table.class}"></th>
+        <th th:text="#{table.detail}"></th>
+        <th th:text="#{table.detail}"></th>
+    </tr>
+
+    <tr th:each="student,status:${studentPage}">
+        <td th:text="${status.count}"></td>
+        <td th:text="${student.id}"></td>
+        <td th:text="${student.name}"></td>
+        <td th:text="${student.gender}"></td>
+        <td th:text="${student?.getClasses()?.name}"></td>
+        <td>
+            <a class="btn btn-sm btn-primary" th:href="@{/student/detail(id=${student.id})}">Detail1-RP</a>
+        </td>
+        <td>
+            <a class="btn btn-sm btn-primary"  th:href="@{/student/detail/__${student.id}__}">Detail1-PV</a>
+        </td>
+    </tr>
+</table>
+<div>
+    <a th:text="#{paging.pre}" th:if="${studentPage.hasPrevious()}" class="btn btn-sm btn-primary" th:href="@{/student(page =${studentPage.number - 1 },searchName =${searchName})}"></a>
+    <span th:text="${studentPage.number + 1}"></span>/<span th:text="${studentPage.totalPages}"></span>
+    <a th:text="#{paging.next}" th:if="${studentPage.hasNext()}" class="btn btn-sm btn-primary" th:href="@{/student(page =${studentPage.number + 1 },searchName =${searchName})}"></a>
+
+</div>
+</body>
+</html>

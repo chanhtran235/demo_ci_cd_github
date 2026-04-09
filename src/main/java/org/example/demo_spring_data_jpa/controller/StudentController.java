@@ -1,0 +1,83 @@
+package org.example.demo_spring_data_jpa.controller;
+
+import jakarta.validation.Valid;
+import org.example.demo_spring_data_jpa.dto.StudentDto;
+import org.example.demo_spring_data_jpa.entity.Student;
+import org.example.demo_spring_data_jpa.exception.DuplicateAdmin;
+import org.example.demo_spring_data_jpa.service.IStudentService;
+import org.example.demo_spring_data_jpa.validation.StudentValidation;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
+
+@Controller
+@RequestMapping("/student")
+public class StudentController {
+    @Autowired
+    private IStudentService studentService;
+
+
+    @GetMapping("")
+    public String showList(@RequestParam(name = "page",required = false,defaultValue = "0")int page,
+                           @RequestParam(name = "searchName", required = false,defaultValue = "")String searchName,
+                           ModelMap model){
+
+        Sort sort = Sort.by("name").descending().and(Sort.by("gender").ascending());
+        Pageable pageable = PageRequest.of(page,5,sort);
+        Page<Student> studentPage =  studentService.search(searchName,pageable);
+        model.addAttribute("studentPage", studentPage);
+        model.addAttribute("searchName", searchName);
+        System.out.println("Nghiệp vụ chính chạy");
+        return "student/list";
+    }
+    @GetMapping("/add")
+    public String showFormAdd(Model model){
+        model.addAttribute("studentDto", new StudentDto());
+        return "student/add";
+    }
+
+    @PostMapping("/add")
+    public  String save(@Valid @ModelAttribute StudentDto studentDto, BindingResult bindingResult,
+                        RedirectAttributes redirectAttributes) throws DuplicateAdmin {
+              new StudentValidation().validate(studentDto,bindingResult);
+              if (bindingResult.hasErrors()){
+                  return "/student/add";
+              }
+              Student student = new Student();
+        BeanUtils.copyProperties(studentDto,student);
+              studentService.add(student);
+              redirectAttributes.addFlashAttribute("mess","is add success");
+        return "redirect:/student";
+    }
+
+    @GetMapping("/detail")
+    public String detail1(@RequestParam(name = "id")int id,
+                          Model model){
+        model.addAttribute("student",studentService.findById(id));
+        return "student/detail";
+    }
+
+    @GetMapping("/detail/{id}")
+    public String detail2(@PathVariable(name = "id")int id,
+                          Model model){
+        model.addAttribute("student",studentService.findById(id));
+        return "student/detail";
+    }
+
+    @ExceptionHandler(DuplicateAdmin.class)
+    public String duplicateException(){
+        return "duplicate-errors";
+    }
+}
